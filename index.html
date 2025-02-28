@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="uthao">
+    <meta name="msapplication-TileImage" content="cart.png">
+    <meta name="msapplication-TileColor" content="#3367D6">
+    <title>Uthao</title>
+
+  </head>
+  <style>
+      *{
+          
+          overscroll-behavior: none;
+      }
+      
+      html,body{
+          height:100%;
+          width: 100%;
+          display :flex;
+          justify-content:center;
+          align-items:center;
+          background-color:black;
+          overflow:hidden;
+          
+
+      }
+
+
+      #offline{
+          height:100%;
+          width:100%;
+          display:none;
+      }
+
+      #offlinePage{
+          height:100%;
+          width:100%;
+          background-color:white;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+
+      }
+
+
+        #wait{
+          width:100%;
+          height:100%;
+          display:flex;
+          flex-direction:column;
+          justify-content:space-between;
+          
+      }
+
+      #frame{
+       
+        width:100%;
+        height: 100%;
+        border: none;
+        display:none;
+        overflow:hidden;
+        
+          
+      }
+
+      :root {
+        --main-color: #ecf0f1;
+        --point-color: #555;
+        --size: 5px;
+        }
+
+        .loader {
+        background-color: var(--main-color);
+        overflow: hidden;
+        flex-grow:3;
+        display: flex;
+        align-items: center;
+        align-content: center; 
+        justify-content: center;  
+	    z-index: 100000;
+        
+        }
+
+        .loader__element {
+        border-radius: 100%;
+        border: var(--size) solid var(--point-color);
+        margin: calc(var(--size)*2);
+        }
+
+        .loader__element:nth-child(1) {
+        animation: preloader .6s ease-in-out alternate infinite;
+        }
+        .loader__element:nth-child(2) {
+        animation: preloader .6s ease-in-out alternate .2s infinite;
+        }
+
+        .loader__element:nth-child(3) {
+        animation: preloader .6s ease-in-out alternate .4s infinite;
+        }
+
+        @keyframes preloader {
+        100% { transform: scale(2); }
+        }
+
+      
+      </style>
+
+    <body>
+        <div id="offline">
+            <div id="offlinePage">
+                <div> 
+                    <h1>
+                        Offline
+                    </h1>
+                    <h3>Connect to the internet</h3>
+                    <br>
+                    <br>
+                    <h2> uthao</h2>
+                </div>               
+            </div>
+        </div>
+
+        <div id="wait" >
+                <div style="background-color:grey;text-align:center;color:navy;font-size=15px;">
+                    <span id="connstatus">  connection ?</span><br>
+                    <span id="downspeed">  speed ? </span><br>
+                    <span id="connectionerror" style="color:yellow;font-size:15px;">  </span>
+                </div>
+                <div class="loader">
+                    <span class="loader__element"></span>
+                    <span class="loader__element"></span>
+                    <span class="loader__element"></span>
+                </div>
+                <div style="background-color:grey;text-align:center;color:navy;">
+                    <h2>uthao</h2>
+                </div>
+
+        </div>
+        <iframe id="frame"   title=""  name="webcontainer"></iframe>
+    </body>
+  
+    <script>
+        
+
+        
+    
+    function blobToBase64(blob) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result); // Convert to Base64
+        reader.readAsDataURL(blob);
+        });
+    }
+
+
+    function fetchAudio(name,source,destination){
+        fetch(name)
+    .then(response => response.blob())
+    .then(blobToBase64)
+    .then(base64Audio => {
+        btnclickbase64= base64Audio;
+        if(source){
+            var res={};
+            res.type="audio";
+            res.name="click";
+            res.rawFile=btnclickbase64;
+            source.postMessage(res, destination);
+        }
+    });
+    }
+    let btnclickbase64;
+    let service;
+    let permission=[];
+    
+    
+    function start(){
+        if(window.navigator.onLine){
+            checkConnection();
+            var container = "web container";
+            var ifr = window.document.getElementById("frame");
+            //ifr.dialogArgs = "web container";
+            ifr.src = "https://script.google.com/macros/s/AKfycby37nvNn1nTbqIx_ZM72GQAa3mkKbtAGJaQ9q3Rs9vuAjwilA1B34GdYduz8F-H_A7LVw/exec";
+
+            
+                
+            connectionTimeout=setTimeout(connectionerror, 5000);
+            if (window.addEventListener) {
+                window.addEventListener("message", listenMessage, false);
+            } else {
+                window.attachEvent("onmessage", listenMessage);
+            }
+       
+            window.addEventListener('load', async () => {
+
+
+            });
+            
+            
+    
+        }else{
+            document.getElementById("wait").style.display="none";
+            document.getElementById("offline").style.display="block";
+            
+
+            console.log("internet connection not found");
+        }
+
+        
+
+    }
+
+    var connectionTimeout;
+    function connectionerror(){
+
+        console.log("connection error ");
+        document.getElementById("connectionerror").innerText=`! SLOW Connection | please wait`;
+        
+    }
+
+    
+
+
+
+
+    function listenMessage(e) {
+        let appurl="https://n-htoqu4bomq6svnzuv6374atsulskk6m5heh2pcy-0lu-script.googleusercontent.com";
+        console.log("url:",appurl);
+    
+        console.log(`${String(e.origin)} : ${e.data}`);
+
+        if(e.origin!==appurl)  {
+            console.log("message from untrusted source");
+            return;
+        }
+        
+        
+        if(e.data=="appLoaded"){
+            if(connectionTimeout != null) clearTimeout(connectionTimeout);
+            showframe();
+            fetchAudio("click.mp3",e.source,e.origin) ;   
+        }
+
+        
+
+    }
+    
+
+    
+
+    function showframe(){
+            document.getElementById("wait").style.display="none";
+             document.getElementById("offline").style.display="none";
+            document.getElementById("frame").style.display="block";
+    }
+
+
+    function checkConnection(){
+        if ('connection' in navigator||'mozConnection' in navigator || 'webkitConnection' in navigator) {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+
+            console.log('Effective Network Type:', connection.effectiveType);
+            console.log('Downlink Speed (Mbps):', connection.downlink);
+            document.getElementById("downspeed").innerText=`speed : ${connection.downlink} m/s`;
+            document.getElementById("connstatus").innerText=`connection : ${connection.effectiveType} `;
+
+            
+
+            // Listen for changes in connection
+            connection.addEventListener('change', () => {
+                //console.log('Network type changed:', connection.effectiveType);
+                //console.log('Downlink Speed (Mbps):', connection.downlink);
+                document.getElementById("downspeed").innerText=`speed : ${connection.downlink } m/s`;
+                document.getElementById("connstatus").innerText=`connection : ${connection.effectiveType} `;
+
+                
+            });
+        } else {
+                console.log('The Network Information API is not supported in this browser.');
+                testConnectionSpeed();
+        }
+
+        
+
+    }
+
+    function testConnectionSpeed() {
+    const startTime = Date.now();
+    const image = new Image();
+    const url = 'https://via.placeholder.com/1.png?' + Math.random(); // Random to prevent caching
+
+    image.onload = () => {
+        const endTime = Date.now();
+        const duration = (endTime - startTime) / 1000; // in seconds
+        const fileSize = 0.001; // in MB (1 KB image)
+        const speedMbps = (fileSize / duration) * 8; // Convert to Mbps
+        console.log('Estimated Speed:', speedMbps.toFixed(2), 'Mbps');
+
+        if (speedMbps < 1) {
+            document.getElementById("downspeed").innerText=`speed : ${speedMbps.toFixed(2)}  mbps || slow`;
+            document.getElementById("connstatus").innerText=`connection : 2g  || slow`;
+            console.log('Your connection is slow.');
+            //setTimeout(showframe, 15000);
+        } else {
+            console.log('Your connection is good.');
+            document.getElementById("downspeed").innerText=`speed : ${speedMbps.toFixed(2)}  mbps || good`;
+            document.getElementById("connstatus").innerText=`connection : 3g  || good`;
+            //setTimeout(showframe, 6000);
+        }
+    };
+
+    image.src = url;
+}
+
+
+
+
+
+    start();
+
+
+  </script>
+  
+
+</html>
